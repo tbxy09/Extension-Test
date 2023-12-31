@@ -18,20 +18,14 @@ class ExtensionTester {
     const { stdout: chromiumPath } = await promisify(exec)("which chromium")
     const browser = await puppeteer.launch({
       headless: false,
+      timeout: 60000,
       args: ["--no-sandbox",
         "--disable-setuid-sandbox",
-        `--disable-extensions-except=${extensionPath}`,
-        `--load-extension=${extensionPath}`
+        `--disable-extensions-except=${extensionPath}/dist`,
+        `--load-extension=${extensionPath}/dist`
       ],
       executablePath: chromiumPath.trim()
-    });
-    // const browser = await puppeteer.launch({
-    //   headless: false, // Change as needed
-    //   args: [
-    //     `--disable-extensions-except=${extensionPath}`,
-    //     `--load-extension=${extensionPath}`
-    //   ]
-    // });
+    })
     const appPage = await browser.newPage();
     // TODO: Implement specific tests and report generation
     // Return test report
@@ -52,10 +46,20 @@ app.post('/upload', upload.single('extension'), async (req, res) => {
       .pipe(unzipper.Extract({ path: `uploads/unpacked/${req.file.filename}` }))
       .promise();
     const extensionPath = `uploads/unpacked/${req.file.filename}`; // Path to the uploaded and unpacked extension
+    console.log('Building extension:', extensionPath);
+    // Building service: npm install & npm run dev
+    const { stdout: buildOutput } = await promisify(exec)(`cd ${extensionPath} && npm install && npm run build`);
+    console.log('Build output:', buildOutput);
+    // Check if the dist directory exists
+    if (!fs.existsSync(`${extensionPath}/dist`)) {
+      console.log('Build failed: dist directory does not exist.');
+      res.status(500).send('Build failed: dist directory does not exist.');
+      return;
+    }
     console.log('Testing extension:', extensionPath);
     // Initiating test directly
     const tester = new ExtensionTester();
-    const report = await tester.runTests(extensionPath);
+    const report = await tester.runTests(`${extensionPath}`);
     res.json({ report });
   } catch (error) {
     console.log('Error:', error);
