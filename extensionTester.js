@@ -1,10 +1,13 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
+const exec = require('util').promisify(require('child_process').exec);
 
 // Setting up the ExtensionTester class in its own module
 class ExtensionTester {
   async runTests(extensionPath) {
     console.log('Running tests for extension at path:', extensionPath);
+    // Fetching the system-wide installation of Chromium
+    const { stdout: chromiumPath } = await exec('which chromium');
     const browser = await puppeteer.launch({
       headless: false,
       args: [
@@ -12,7 +15,8 @@ class ExtensionTester {
         "--disable-setuid-sandbox",
         `--disable-extensions-except=${extensionPath}`,
         `--load-extension=${extensionPath}`
-      ]
+      ],
+      executablePath: chromiumPath.trim()
     });
     const targets = await browser.targets();
     const extensionTarget = targets.find(target => target.type() === 'service_worker' && target.url().includes(extensionPath));
