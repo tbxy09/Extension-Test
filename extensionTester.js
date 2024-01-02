@@ -18,13 +18,11 @@ class ExtensionTester {
       ],
       executablePath: chromiumPath.trim()
     });
-    const targets = await browser.targets();
-    const extensionTarget = targets.find(target => target.type() === 'service_worker' && target.url().includes(extensionPath));
-    const partialExtensionUrl = extensionTarget.url() || '';
-    const [, , extensionId] = partialExtensionUrl.split('/');
 
-    // Opening a new page to test content script injection
-    const page = await browser.newPage();
+    // Ensure each session uses a separate browser context for isolation
+    const context = await browser.createIncognitoBrowserContext();
+    const page = await context.newPage();
+
     await page.goto('https://example.com');
     const isPreviewPaneInjected = await page.evaluate(() => {
       const previewPane = document.getElementById('extension-preview-panel');
@@ -36,11 +34,14 @@ class ExtensionTester {
     });
 
     // Navigate to the extension's index.html page
-    const extPage = await browser.newPage();
+    const extPage = await context.newPage();
     const extensionUrl = `chrome-extension://${extensionId}/index.html`;
     await extPage.goto(extensionUrl, { waitUntil: 'networkidle0' });
     const screenshotPath = 'test-result.png';
     await extPage.screenshot({ path: screenshotPath });
+
+    // Closing the browser context after the test
+    await context.close();
     await browser.close();
     const report = {
       extensionId,
@@ -49,6 +50,7 @@ class ExtensionTester {
       isWrapperAdjusted,
       screenshotPath
     };
+
     fs.writeFileSync('test-result.json', JSON.stringify(report, null, 2));
     return report;
   }
