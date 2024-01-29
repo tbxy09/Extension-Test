@@ -25,13 +25,6 @@ class ExtensionTester {
       ],
       executablePath: chromiumPath.trim()
     });
-    // const browser = await puppeteer.launch({
-    //   headless: false, // Change as needed
-    //   args: [
-    //     `--disable-extensions-except=${extensionPath}`,
-    //     `--load-extension=${extensionPath}`
-    //   ]
-    // });
     const appPage = await browser.newPage();
     // TODO: Implement specific tests and report generation
     // Return test report
