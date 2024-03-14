@@ -1,6 +1,7 @@
 entrypoint = "index.js"
 
 hidden = [".config", "package-lock.json"]
+modules = ["python-3.10:v25-20230920-d4ad2e4", "python-3.10:v25-20230920-d4ad2e4", "python-3.10:v25-20230920-d4ad2e4", "python-3.10:v25-20230920-d4ad2e4", "python-3.10:v25-20230920-d4ad2e4", "python-3.10:v25-20230920-d4ad2e4"]
 
 [interpreter]
 command = [
@@ -22,6 +23,7 @@ channel = "stable-22_11"
 XDG_CONFIG_HOME = "/home/runner/$REPL_SLUG/.config"
 PATH = "/home/runner/$REPL_SLUG/.config/npm/node_global/bin:/home/runner/$REPL_SLUG/node_modules/.bin"
 npm_config_prefix = "/home/runner/$REPL_SLUG/.config/npm/node_global"
+
 
 [gitHubImport]
 requiredFiles = [".replit", "replit.nix", ".config", "package.json", "package-lock.json"]
@@ -87,3 +89,7 @@ start = "typescript-language-server --stdio"
 
 [deployment]
 run = ["sh", "-c", "node index.js"]
+
+[[ports]]
+localPort = 3000
+externalPort = 80

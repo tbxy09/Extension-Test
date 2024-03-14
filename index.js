@@ -4,7 +4,7 @@ const upload = multer({ dest: 'uploads/' });
 const unzipper = require('unzipper');
 const fs = require('fs'); // Make sure to add this as it's used in the script
 const exec = require('util').promisify(require('child_process').exec);
-const ExtensionTester = require('./extensionTester');
+const ExtensionTester = require('./CypressTester')
 
 // Express server setup for handling uploads and serving the report
 const app = express();
